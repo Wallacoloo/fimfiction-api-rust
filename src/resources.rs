@@ -1,10 +1,11 @@
 //! Contains all the structs defining "resources" with the fimfiction api may return.
 use chrono::{DateTime, Utc};
 use reqwest::Url;
-use serde::de::{Deserialize, DeserializeOwned};
+use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use url_serde;
+use url_serde::SerdeUrl;
 
 /// Fimfiction often returns data inside a "data" key.
 /// This object provides a way to replicate that wrapping on the rust side.
@@ -26,16 +27,18 @@ pub struct ResourceId {
 
 #[derive(Debug, Deserialize)]
 pub struct TypedResource<Attr: Debug, Rel: Debug> {
-    #[serde(rename="type")]
-    type_: String,
+    // Because this is strongly typed, we already know the value of the 'type' field.
+    // Let serde manage it whenever we deserialize into an enum (where type is one of many).
+    //#[serde(rename="type")]
+    //type_: String,
     // TODO It's really an int though.
     id: String,
     attributes: Attr,
     /// When accessed through the "included" field, no relationships are shown.
     relationships: Option<Rel>,
     // TODO: learn more about these types and make them type-safe
-    links: HashMap<String, String>,
-    meta: HashMap<String, String>,
+    links: HashMap<String, SerdeUrl>,
+    meta: HashMap<String, Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -84,6 +87,64 @@ pub struct CoverImage {
     full: Url,
 }
 
+/// Position of a author's note.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all="snake_case")]
+pub enum Position {
+    Top,
+    Bottom,
+}
+/// Privacy settings for a story
+#[derive(Debug, Deserialize)]
+#[serde(rename_all="snake_case")]
+pub enum Privacy {
+    Private,
+    Unlisted,
+    Public
+}
+
+/// Story publish status
+#[derive(Debug, Deserialize)]
+#[serde(rename_all="snake_case")]
+pub enum PublishStatus {
+    Visible,
+    NotVisible,
+    ApproveQueue,
+    PostQueue,
+}
+/// Story completion status
+#[derive(Debug, Deserialize)]
+#[serde(rename_all="snake_case")]
+pub enum CompletionStatus {
+    Incomplete,
+    Complete,
+    Hiatus,
+    Cancelled,
+}
+/// Story content rating
+#[derive(Debug, Deserialize)]
+#[serde(rename_all="snake_case")]
+pub enum ContentRating {
+    Everyone,
+    Teen,
+    Mature,
+}
+/// Story tag type
+#[derive(Debug, Deserialize)]
+#[serde(rename_all="snake_case")]
+pub enum TagType {
+    Character,
+    Genre,
+    Rating,
+    Content,
+    Series,
+    Warning,
+    Universe,
+}
+
+
+
+
 #[derive(Debug, Deserialize)]
 pub struct BlogPostAttributes {
     /// Title of the blog post
@@ -104,8 +165,10 @@ pub struct BlogPostAttributes {
     /// Whether the post is a site post or not
     site_post: bool,
     /// The site post tag of this post. Only returned if site_post is true
+    // TODO: Should this be `TagType'?
     site_post_tag: String,
     /// Array of tags on this blog post
+    // TODO: Should this be `TagType'?
     tags: Vec<String>,
 }
 #[derive(Debug, Deserialize)]
@@ -118,9 +181,9 @@ pub type BlogPost = TypedResource<BlogPostAttributes, BlogPostRelationships>;
 #[derive(Debug, Deserialize)]
 pub struct BookshelfAttributes {
     name: String,
-    // TODO: should be enum
-    privacy: String,
+    privacy: Privacy,
     description: String,
+    // TODO: dedicated 'color' type?
     color: String,
     // TODO
     //icon:
@@ -139,6 +202,26 @@ pub struct BookshelfRelationships {
 }
 pub type Bookshelf = TypedResource<BookshelfAttributes, BookshelfRelationships>;
 
+#[derive(Debug, Deserialize)]
+pub struct ChapterAttributes {
+    chapter_number: u32,
+    title: String,
+    published: bool,
+    num_views: u32,
+    date_published: DateTime<Utc>,
+    date_modified: DateTime<Utc>,
+    content: Option<String>,
+    content_html: Option<String>,
+    // TODO:
+    //authors_note: Option<object>
+    authors_note_html: Option<String>,
+    authors_note_position: Position,
+}
+#[derive(Debug, Deserialize)]
+pub struct ChapterRelationships {
+    story: Data<ResourceId>,
+}
+pub type Chapter = TypedResource<ChapterAttributes, ChapterRelationships>;
 
 #[derive(Debug, Deserialize)]
 pub struct FollowAttributes {
@@ -220,8 +303,7 @@ pub struct StoryAttributes {
     /// Whether the story is published or not. Effectively the same as checking if status = visible	
     published: bool,
     /// The publish status of the story
-    // TODO (should be an enum)
-    status: String,
+    status: PublishStatus,
     /// Whether the story has been submitted or not. Set to true to submit the story
     submitted: bool,
     /// Date the story was first published
@@ -246,9 +328,8 @@ pub struct StoryAttributes {
     // undocumented attributes below
     num_chapters: u32,
     rating: u32,
-    // TODO: could be an enum?
-    completion_status: String,
-    content_rating: String,
+    completion_status: CompletionStatus,
+    content_rating: ContentRating,
     num_likes: u32,
     num_dislikes: u32,
 }
@@ -268,17 +349,18 @@ pub type Story = TypedResource<StoryAttributes, StoryRelationships>;
 pub struct StoryTagAttributes {
     name: String,
     description: Option<String>,
-    // TODO: enum
     #[serde(rename="type")]
-    type_: String,
+    type_: TagType,
     num_stories: u32,
 }
+pub type StoryTag = TypedResource<StoryTagAttributes, ()>;
 
 
 #[derive(Debug, Deserialize)]
 pub struct UserAttributes {
     name: String,
-    email: String,
+    // fimfiction docs advertise an 'email' field, but it doesn't exist.
+    //email: String,
     // TODO
     //bio: object
     bio_html: String,
@@ -290,10 +372,20 @@ pub struct UserAttributes {
     // undocumented
     color: Color,
 }
+pub type User = TypedResource<UserAttributes, ()>;
 
 
 #[derive(Debug, Deserialize)]
-#[serde(untagged, rename_all="snake_case")]
+#[serde(tag="type", rename_all="snake_case")]
 pub enum Resource {
+    BlogPost(BlogPost),
+    Bookshelf(Bookshelf),
+    Chapter(Chapter),
+    Follow(Follow),
+    Group(Group),
+    GroupThread(GroupThread),
+    PrivateMessage(PrivateMessage),
     Story(Story),
+    StoryTag(StoryTag),
+    User(User),
 }

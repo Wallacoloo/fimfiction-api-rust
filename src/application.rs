@@ -1,9 +1,10 @@
 use reqwest;
 use reqwest::{Client, header, RequestBuilder, Url};
 use serde::de::DeserializeOwned;
-use url_serde;
+use serde_json::Value;
+use std::collections::HashMap;
 
-use resources::{Resource, StoryAttributes};
+use resources::{Resource, Story};
 
 /// Applications allow for the server to associate each request with some context
 /// (i.e. some application). https://www.fimfiction.net/developers/api/v2/docs/applications
@@ -18,13 +19,22 @@ pub struct Application {
 #[derive(Debug, Deserialize)]
 pub struct ApiResponse {
     data: Resource,
-    //included: Vec<Resource>,
-    //#[serde(with="url_serde")]
-    //uri: Url,
-    //method: String,
-    // TODO
-    //debug: object
+    included: Vec<Resource>,
+    // NB: Url relative to fimfiction.net; cannot use Url type for that.
+    uri: String,
+    method: String,
+    debug: HashMap<String, Value>,
 }
+#[derive(Debug, Deserialize)]
+pub struct TypedApiResponse<T> {
+    data: T,
+    included: Vec<Resource>,
+    // NB: Url relative to fimfiction.net; cannot use Url type for that.
+    uri: String,
+    method: String,
+    debug: HashMap<String, Value>,
+}
+type StoryResponse = TypedApiResponse<Story>;
 
 
 
@@ -56,7 +66,7 @@ impl Application {
         })
     }
     /// Retrieve a story by its id
-    pub fn story(&self, story_id: u32) -> Result<ApiResponse, reqwest::Error> {
+    pub fn story(&self, story_id: u32) -> Result<StoryResponse, reqwest::Error> {
         self.do_request(
             self.client.get(Self::endpoint(format!("stories/{}", story_id)))
         )
