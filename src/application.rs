@@ -4,7 +4,7 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 use std::collections::HashMap;
 
-use resources::{Resource, Story};
+use resources::{BlogPost, Bookshelf, Chapter, Group, PrivateMessage, Resource, Story, User};
 
 /// Applications allow for the server to associate each request with some context
 /// (i.e. some application). https://www.fimfiction.net/developers/api/v2/docs/applications
@@ -12,7 +12,7 @@ use resources::{Resource, Story};
 pub struct Application {
     client: Client,
     /// Header used to authorize any requests with fimfiction.
-    /// TODO: Can use Bearer?
+    /// TODO: Can use header::Bearer?
     auth_header: header::Authorization<String>,
 }
 
@@ -34,7 +34,14 @@ pub struct TypedApiResponse<T> {
     method: String,
     debug: HashMap<String, Value>,
 }
-type StoryResponse = TypedApiResponse<Story>;
+pub type BlogPostResponse = TypedApiResponse<BlogPost>;
+pub type BookshelfResponse = TypedApiResponse<Bookshelf>;
+pub type ChapterResponse = TypedApiResponse<Chapter>;
+//pub type FollowersResponse = TypedApiResponse<Vec<Follow>>;
+pub type GroupResponse = TypedApiResponse<Group>;
+pub type PrivateMessageResponse = TypedApiResponse<PrivateMessage>;
+pub type StoryResponse = TypedApiResponse<Story>;
+pub type UserResponse = TypedApiResponse<User>;
 
 
 
@@ -65,12 +72,49 @@ impl Application {
             auth_header: header::Authorization(resp_data.token_type + " " + &resp_data.access_token),
         })
     }
-    /// Retrieve a story by its id
-    pub fn story(&self, story_id: u32) -> Result<StoryResponse, reqwest::Error> {
+    /// Retrieve a blogpost by its id (/blog-posts/:id).
+    pub fn blog_post(&self, id: u32) -> Result<BlogPostResponse, reqwest::Error> {
         self.do_request(
-            self.client.get(Self::endpoint(format!("stories/{}", story_id)))
+            self.client.get(Self::endpoint(format!("blog_posts/{}", id)))
         )
     }
+    /// Retrieve a bookshelf by its id (/blog-posts/:id).
+    pub fn bookshelf(&self, id: u32) -> Result<BookshelfResponse, reqwest::Error> {
+        self.do_request(
+            self.client.get(Self::endpoint(format!("bookshelves/{}", id)))
+        )
+    }
+    /// Retrieve a chapter by its id (/blog-posts/:id).
+    pub fn chapter(&self, id: u32) -> Result<ChapterResponse, reqwest::Error> {
+        self.do_request(
+            self.client.get(Self::endpoint(format!("chapters/{}", id)))
+        )
+    }
+    /// Retrieve a group by its id (/groups/:id).
+    pub fn group(&self, id: u32) -> Result<GroupResponse, reqwest::Error> {
+        self.do_request(
+            self.client.get(Self::endpoint(format!("groups/{}", id)))
+        )
+    }
+    /// Retrieve a private message by its id (/private-messages/:id).
+    pub fn private_message(&self, id: u32) -> Result<PrivateMessageResponse, reqwest::Error> {
+        self.do_request(
+            self.client.get(Self::endpoint(format!("private-messages/{}", id)))
+        )
+    }
+    /// Retrieve a story by its id (/stories/:id).
+    pub fn story(&self, id: u32) -> Result<StoryResponse, reqwest::Error> {
+        self.do_request(
+            self.client.get(Self::endpoint(format!("stories/{}", id)))
+        )
+    }
+    /// Retrieve a user by its id (/users/:id).
+    pub fn user(&self, id: u32) -> Result<UserResponse, reqwest::Error> {
+        self.do_request(
+            self.client.get(Self::endpoint(format!("users/{}", id)))
+        )
+    }
+
     /// Build the full URL to the given endpoint
     fn endpoint<T: AsRef<str>>(tail: T) -> Url {
         Url::parse("https://www.fimfiction.net/api/v2/").unwrap().join(tail.as_ref()).unwrap()
