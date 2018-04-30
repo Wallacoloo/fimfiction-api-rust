@@ -62,6 +62,7 @@ pub struct Avatar {
     #[serde(with = "url_serde", rename="128")]
     size128: Url,
     #[serde(with = "url_serde", rename="192")]
+    #[serde(default)]
     size192: Option<Url>,
     #[serde(with = "url_serde", rename="256")]
     size256: Url,

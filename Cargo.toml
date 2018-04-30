@@ -5,6 +5,7 @@ authors = ["Colin Wallace <colin@mooooo.ooo>"]
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
 reqwest = "0.8"
 serde = "1.0"
 serde_derive = "1.0"

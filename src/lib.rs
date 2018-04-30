@@ -1,4 +1,6 @@
 extern crate chrono;
+#[macro_use]
+extern crate log;
 extern crate reqwest;
 extern crate serde;
 #[macro_use]

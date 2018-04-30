@@ -64,9 +64,9 @@ impl Application {
             .header(Self::ua_header())
             .form(&post_data)
             .send()?;
-        println!("{:?}", response);
+        debug!("authorization response: {:?}", response);
         let resp_data: RespData = response.json()?;
-        println!("authorized: {:?}", resp_data);
+        debug!("authorized: {:?}", resp_data);
         Ok(Self{
             client,
             auth_header: header::Authorization(resp_data.token_type + " " + &resp_data.access_token),
@@ -124,7 +124,7 @@ impl Application {
         let mut resp = req.header(self.auth_header.clone())
             .header(Self::ua_header())
             .send()?;
-        println!("resp: {:?}", resp);
+        debug!("do_request response: {:?}", resp);
         //println!("resp.text: {}", resp.text().unwrap());
         resp.json()
     }
