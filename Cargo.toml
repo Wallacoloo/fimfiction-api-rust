@@ -1,0 +1,11 @@
+[package]
+name = "fimfiction-api"
+version = "0.1.0"
+authors = ["Colin Wallace <colin@mooooo.ooo>"]
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+reqwest = "0.8"
+serde = "1.0"
+serde_derive = "1.0"
+url_serde = "0.2"
