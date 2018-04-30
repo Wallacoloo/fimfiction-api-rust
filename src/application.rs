@@ -75,7 +75,7 @@ impl Application {
     /// Retrieve a blogpost by its id (/blog-posts/:id).
     pub fn blog_post(&self, id: u32) -> Result<BlogPostResponse, reqwest::Error> {
         self.do_request(
-            self.client.get(Self::endpoint(format!("blog_posts/{}", id)))
+            self.client.get(Self::endpoint(format!("blog-posts/{}", id)))
         )
     }
     /// Retrieve a bookshelf by its id (/blog-posts/:id).
@@ -97,6 +97,7 @@ impl Application {
         )
     }
     /// Retrieve a private message by its id (/private-messages/:id).
+    // NB: untested! Requires the read_pms scope.
     pub fn private_message(&self, id: u32) -> Result<PrivateMessageResponse, reqwest::Error> {
         self.do_request(
             self.client.get(Self::endpoint(format!("private-messages/{}", id)))
@@ -124,7 +125,7 @@ impl Application {
             .header(Self::ua_header())
             .send()?;
         println!("resp: {:?}", resp);
-        //println!("resp.text: {:?}", resp.text());
+        //println!("resp.text: {}", resp.text().unwrap());
         resp.json()
     }
     /// User-agent 

@@ -37,13 +37,18 @@ pub struct TypedResource<Attr: Debug, Rel: Debug> {
     /// When accessed through the "included" field, no relationships are shown.
     relationships: Option<Rel>,
     // TODO: learn more about these types and make them type-safe
+    #[serde(default)]
     links: HashMap<String, SerdeUrl>,
+    #[serde(default)]
     meta: HashMap<String, Value>,
 }
 
 #[derive(Debug, Deserialize)]
 /// List of differently sized avatar images available
 pub struct Avatar {
+    // TODO: how many of these sizes are optional?
+    // 192 was not found for https://www.fimfiction.net/api/v2/groups/209275
+    // TODO: Maybe some sparse vector type is better.
     #[serde(with = "url_serde", rename="16")]
     size16: Url,
     #[serde(with = "url_serde", rename="32")]
@@ -57,7 +62,7 @@ pub struct Avatar {
     #[serde(with = "url_serde", rename="128")]
     size128: Url,
     #[serde(with = "url_serde", rename="192")]
-    size192: Url,
+    size192: Option<Url>,
     #[serde(with = "url_serde", rename="256")]
     size256: Url,
     #[serde(with = "url_serde", rename="384")]
@@ -85,6 +90,15 @@ pub struct CoverImage {
     large: Url,
     #[serde(with = "url_serde")]
     full: Url,
+}
+/// Bookshelf icon.
+/// It appears the bookshelf icon is glyph from a font
+#[derive(Debug, Deserialize)]
+pub struct Icon {
+    name: String,
+    #[serde(rename="type")]
+    type_: String,
+    data: String,
 }
 
 /// Position of a author's note.
@@ -166,7 +180,7 @@ pub struct BlogPostAttributes {
     site_post: bool,
     /// The site post tag of this post. Only returned if site_post is true
     // TODO: Should this be `TagType'?
-    site_post_tag: String,
+    site_post_tag: Option<String>,
     /// Array of tags on this blog post
     // TODO: Should this be `TagType'?
     tags: Vec<String>,
@@ -185,8 +199,7 @@ pub struct BookshelfAttributes {
     description: String,
     // TODO: dedicated 'color' type?
     color: String,
-    // TODO
-    //icon:
+    icon: Icon,
     num_stories: u32,
     num_unread: u32,
     track_unread: bool,
@@ -198,7 +211,10 @@ pub struct BookshelfAttributes {
 }
 #[derive(Debug, Deserialize)]
 pub struct BookshelfRelationships {
-    story: Data<ResourceId>,
+    // TODO: 'user' relationship wasn't documented, but is present for /api/v2/bookshelves/16299
+    user: Data<ResourceId>,
+    // TODO: 'story' relationship was documented, but not present for /api/v2/bookshelves/16299
+    //story: Data<ResourceId>,
 }
 pub type Bookshelf = TypedResource<BookshelfAttributes, BookshelfRelationships>;
 
@@ -246,6 +262,9 @@ pub struct GroupAttributes {
     open: bool,
     hidden: bool,
     date_created: DateTime<Utc>,
+
+    // Undocumented:
+    icon: Avatar,
 }
 #[derive(Debug, Deserialize)]
 pub struct GroupRelationships {
@@ -369,8 +388,11 @@ pub struct UserAttributes {
     num_blog_posts: u32,
     date_joined: DateTime<Utc>,
     avatar: Avatar,
+
     // undocumented
     color: Color,
+    // Doesn't seem to be present when accessed from a story's 'included' resources
+    date_last_online: Option<DateTime<Utc>>,
 }
 pub type User = TypedResource<UserAttributes, ()>;
 
