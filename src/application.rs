@@ -13,7 +13,7 @@ pub struct Application {
     client: Client,
     /// Header used to authorize any requests with fimfiction.
     /// TODO: Can use header::Bearer?
-    auth_header: header::Authorization<String>,
+    auth_header: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -61,7 +61,7 @@ impl Application {
             token_type: String,
         }
         let mut response = client.post(Self::endpoint("token"))
-            .header(Self::ua_header())
+            .header(header::USER_AGENT, Self::user_agent())
             .form(&post_data)
             .send()?;
         debug!("authorization response: {:?}", response);
@@ -69,7 +69,7 @@ impl Application {
         debug!("authorized: {:?}", resp_data);
         Ok(Self{
             client,
-            auth_header: header::Authorization(resp_data.token_type + " " + &resp_data.access_token),
+            auth_header: resp_data.token_type + " " + &resp_data.access_token,
         })
     }
     /// Retrieve a blogpost by its id (/blog-posts/:id).
@@ -120,16 +120,15 @@ impl Application {
     fn endpoint<T: AsRef<str>>(tail: T) -> Url {
         Url::parse("https://www.fimfiction.net/api/v2/").unwrap().join(tail.as_ref()).unwrap()
     }
-    fn do_request<T: DeserializeOwned>(&self, mut req: RequestBuilder) -> Result<T, reqwest::Error> {
-        let mut resp = req.header(self.auth_header.clone())
-            .header(Self::ua_header())
+    fn do_request<T: DeserializeOwned>(&self, req: RequestBuilder) -> Result<T, reqwest::Error> {
+        let mut resp = req.header(header::AUTHORIZATION, self.auth_header.clone())
+            .header(header::USER_AGENT, Self::user_agent())
             .send()?;
         debug!("do_request response: {:?}", resp);
         //println!("resp.text: {}", resp.text().unwrap());
         resp.json()
     }
-    /// User-agent 
-    fn ua_header() -> header::UserAgent {
-        header::UserAgent::new("rust-fimfiction-api")
+    fn user_agent() -> &'static str {
+        "rust-fimfiction-api"
     }
 }
