@@ -18,21 +18,21 @@ pub struct Application {
 
 #[derive(Debug, Deserialize)]
 pub struct ApiResponse {
-    data: Resource,
-    included: Vec<Resource>,
+    pub data: Resource,
+    pub included: Vec<Resource>,
     // NB: Url relative to fimfiction.net; cannot use Url type for that.
-    uri: String,
-    method: String,
-    debug: HashMap<String, Value>,
+    pub uri: String,
+    pub method: String,
+    pub debug: HashMap<String, Value>,
 }
 #[derive(Debug, Deserialize)]
 pub struct TypedApiResponse<T> {
-    data: T,
-    included: Vec<Resource>,
+    pub data: T,
+    pub included: Vec<Resource>,
     // NB: Url relative to fimfiction.net; cannot use Url type for that.
-    uri: String,
-    method: String,
-    debug: HashMap<String, Value>,
+    pub uri: String,
+    pub method: String,
+    pub debug: HashMap<String, Value>,
 }
 pub type BlogPostResponse = TypedApiResponse<BlogPost>;
 pub type BookshelfResponse = TypedApiResponse<Bookshelf>;

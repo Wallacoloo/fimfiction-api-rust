@@ -9,108 +9,108 @@ use url_serde::SerdeUrl;
 
 /// Fimfiction often returns data inside a "data" key.
 /// This object provides a way to replicate that wrapping on the rust side.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Data<T: Debug> {
-    data: T,
+    pub data: T,
 }
 
 /// When a query returns 'resources', these resources are transmitted only as
 /// references. i.e. the type and ID of the resource is returned, allowing one
 /// to make further queries accordingly or extract them from the 'included' object.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ResourceId {
     #[serde(rename="type")]
-    type_: String,
+    pub type_: String,
     // TODO It's really an int though.
-    id: String,
+    pub id: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct TypedResource<Attr: Debug, Rel: Debug> {
     // Because this is strongly typed, we already know the value of the 'type' field.
     // Let serde manage it whenever we deserialize into an enum (where type is one of many).
     //#[serde(rename="type")]
     //type_: String,
     // TODO It's really an int though.
-    id: String,
-    attributes: Attr,
+    pub id: String,
+    pub attributes: Attr,
     /// When accessed through the "included" field, no relationships are shown.
-    relationships: Option<Rel>,
+    pub relationships: Option<Rel>,
     // TODO: learn more about these types and make them type-safe
     #[serde(default)]
-    links: HashMap<String, SerdeUrl>,
+    pub links: HashMap<String, SerdeUrl>,
     #[serde(default)]
-    meta: HashMap<String, Value>,
+    pub meta: HashMap<String, Value>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 /// List of differently sized avatar images available
 pub struct Avatar {
     // TODO: how many of these sizes are optional?
     // 192 was not found for https://www.fimfiction.net/api/v2/groups/209275
     // TODO: Maybe some sparse vector type is better.
     #[serde(with = "url_serde", rename="16")]
-    size16: Url,
+    pub size16: Url,
     #[serde(with = "url_serde", rename="32")]
-    size32: Url,
+    pub size32: Url,
     #[serde(with = "url_serde", rename="48")]
-    size48: Url,
+    pub size48: Url,
     #[serde(with = "url_serde", rename="64")]
-    size64: Url,
+    pub size64: Url,
     #[serde(with = "url_serde", rename="96")]
-    size96: Url,
+    pub size96: Url,
     #[serde(with = "url_serde", rename="128")]
-    size128: Url,
+    pub size128: Url,
     #[serde(with = "url_serde", rename="192")]
     #[serde(default)]
-    size192: Option<Url>,
+    pub size192: Option<Url>,
     #[serde(with = "url_serde", rename="256")]
-    size256: Url,
+    pub size256: Url,
     #[serde(with = "url_serde", rename="384")]
-    size384: Url,
+    pub size384: Url,
     #[serde(with = "url_serde", rename="512")]
-    size512: Url,
+    pub size512: Url,
 }
 
 /// 'color' struct, as serialized by Fimfiction's API,
 /// e.g. the 'color' field within a story.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Color {
-    hex: String,
-    rgb: [u8; 3],
+    pub hex: String,
+    pub rgb: [u8; 3],
 }
 /// Links to where the cover image for a story may be found.
 /// One link per each size of the story.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CoverImage {
     #[serde(with = "url_serde")]
-    thumbnail: Url,
+    pub thumbnail: Url,
     #[serde(with = "url_serde")]
-    medium: Url,
+    pub medium: Url,
     #[serde(with = "url_serde")]
-    large: Url,
+    pub large: Url,
     #[serde(with = "url_serde")]
-    full: Url,
+    pub full: Url,
 }
 /// Bookshelf icon.
 /// It appears the bookshelf icon is glyph from a font
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Icon {
-    name: String,
+    pub name: String,
     #[serde(rename="type")]
-    type_: String,
-    data: String,
+    pub type_: String,
+    pub data: String,
 }
 
 /// Position of a author's note.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="snake_case")]
 pub enum Position {
     Top,
     Bottom,
 }
 /// Privacy settings for a story
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="snake_case")]
 pub enum Privacy {
     Private,
@@ -119,7 +119,7 @@ pub enum Privacy {
 }
 
 /// Story publish status
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="snake_case")]
 pub enum PublishStatus {
     Visible,
@@ -128,7 +128,7 @@ pub enum PublishStatus {
     PostQueue,
 }
 /// Story completion status
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="snake_case")]
 pub enum CompletionStatus {
     Incomplete,
@@ -137,7 +137,7 @@ pub enum CompletionStatus {
     Cancelled,
 }
 /// Story content rating
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="snake_case")]
 pub enum ContentRating {
     Everyone,
@@ -145,7 +145,7 @@ pub enum ContentRating {
     Mature,
 }
 /// Story tag type
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="snake_case")]
 pub enum TagType {
     Character,
@@ -160,245 +160,245 @@ pub enum TagType {
 
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BlogPostAttributes {
     /// Title of the blog post
-    title: String,
+    pub title: String,
     /// Date the blog entry was posted
-    date_posted: DateTime<Utc>,
+    pub date_posted: DateTime<Utc>,
     /// HTML marked up truncated intro of the post
-    intro: Option<String>,
+    pub intro: Option<String>,
     ///// Content of the blog post
     // TODO: object
     //content: Option<String>,
     /// HTML version of content
-    content_html: Option<String>,
+    pub content_html: Option<String>,
     /// Number of views the blog post has
-    num_views: u32,
+    pub num_views: u32,
     /// Number of comments the blog post has
-    num_comments: u32,
+    pub num_comments: u32,
     /// Whether the post is a site post or not
-    site_post: bool,
+    pub site_post: bool,
     /// The site post tag of this post. Only returned if site_post is true
     // TODO: Should this be `TagType'?
-    site_post_tag: Option<String>,
+    pub site_post_tag: Option<String>,
     /// Array of tags on this blog post
     // TODO: Should this be `TagType'?
-    tags: Vec<String>,
+    pub tags: Vec<String>,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BlogPostRelationships {
-    author: Data<ResourceId>,
-    tagged_story: Data<ResourceId>,
+    pub author: Data<ResourceId>,
+    pub tagged_story: Data<ResourceId>,
 }
 pub type BlogPost = TypedResource<BlogPostAttributes, BlogPostRelationships>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BookshelfAttributes {
-    name: String,
-    privacy: Privacy,
-    description: String,
+    pub name: String,
+    pub privacy: Privacy,
+    pub description: String,
     // TODO: dedicated 'color' type?
-    color: String,
-    icon: Icon,
-    num_stories: u32,
-    num_unread: u32,
-    track_unread: bool,
-    quick_add: bool,
-    email_on_update: bool,
-    date_created: DateTime<Utc>,
-    date_modified: DateTime<Utc>,
-    order: u32,
+    pub color: String,
+    pub icon: Icon,
+    pub num_stories: u32,
+    pub num_unread: u32,
+    pub track_unread: bool,
+    pub quick_add: bool,
+    pub email_on_update: bool,
+    pub date_created: DateTime<Utc>,
+    pub date_modified: DateTime<Utc>,
+    pub order: u32,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BookshelfRelationships {
     // TODO: 'user' relationship wasn't documented, but is present for /api/v2/bookshelves/16299
-    user: Data<ResourceId>,
+    pub user: Data<ResourceId>,
     // TODO: 'story' relationship was documented, but not present for /api/v2/bookshelves/16299
-    //story: Data<ResourceId>,
+    //pub story: Data<ResourceId>,
 }
 pub type Bookshelf = TypedResource<BookshelfAttributes, BookshelfRelationships>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ChapterAttributes {
-    chapter_number: u32,
-    title: String,
-    published: bool,
-    num_views: u32,
-    date_published: DateTime<Utc>,
-    date_modified: DateTime<Utc>,
-    content: Option<String>,
-    content_html: Option<String>,
+    pub chapter_number: u32,
+    pub title: String,
+    pub published: bool,
+    pub num_views: u32,
+    pub date_published: DateTime<Utc>,
+    pub date_modified: DateTime<Utc>,
+    pub content: Option<String>,
+    pub content_html: Option<String>,
     // TODO:
-    //authors_note: Option<object>
-    authors_note_html: Option<String>,
-    authors_note_position: Position,
+    //pub authors_note: Option<object>
+    pub authors_note_html: Option<String>,
+    pub authors_note_position: Position,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ChapterRelationships {
-    story: Data<ResourceId>,
+    pub story: Data<ResourceId>,
 }
 pub type Chapter = TypedResource<ChapterAttributes, ChapterRelationships>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct FollowAttributes {
-    date_followed: DateTime<Utc>,
+    pub date_followed: DateTime<Utc>,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct FollowRelationships {
-    user: Data<ResourceId>,
-    following: Data<ResourceId>,
+    pub user: Data<ResourceId>,
+    pub following: Data<ResourceId>,
 }
 pub type Follow = TypedResource<FollowAttributes, FollowRelationships>;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GroupAttributes {
-    name: String,
-    description: String,
-    description_html: String,
-    num_members: u32,
-    num_stories: u32,
-    nsfw: bool,
-    open: bool,
-    hidden: bool,
-    date_created: DateTime<Utc>,
+    pub name: String,
+    pub description: String,
+    pub description_html: String,
+    pub num_members: u32,
+    pub num_stories: u32,
+    pub nsfw: bool,
+    pub open: bool,
+    pub hidden: bool,
+    pub date_created: DateTime<Utc>,
 
     // Undocumented:
-    icon: Avatar,
+    pub icon: Avatar,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GroupRelationships {
-    founder: Data<ResourceId>,
+    pub founder: Data<ResourceId>,
 }
 pub type Group = TypedResource<GroupAttributes, GroupRelationships>;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GroupThreadAttributes {
-    title: String,
-    num_posts: u32,
-    date_created: DateTime<Utc>,
-    date_last_posted: DateTime<Utc>,
-    sticky: bool,
-    locked: bool,
+    pub title: String,
+    pub num_posts: u32,
+    pub date_created: DateTime<Utc>,
+    pub date_last_posted: DateTime<Utc>,
+    pub sticky: bool,
+    pub locked: bool,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GroupThreadRelationships {
-    creator: Data<ResourceId>,
-    group: Data<ResourceId>,
-    last_poster: Data<ResourceId>,
+    pub creator: Data<ResourceId>,
+    pub group: Data<ResourceId>,
+    pub last_poster: Data<ResourceId>,
 }
 pub type GroupThread = TypedResource<GroupThreadAttributes, GroupThreadRelationships>;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PrivateMessageAttributes {
-    subject: String,
+    pub subject: String,
     // TODO
     //content: object
-    content_html: String,
-    date_sent: DateTime<Utc>,
-    read: bool,
+    pub content_html: String,
+    pub date_sent: DateTime<Utc>,
+    pub read: bool,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PrivateMessageRelationships {
-    sender: Data<UserAttributes>,
-    receiver: Data<UserAttributes>,
+    pub sender: Data<UserAttributes>,
+    pub receiver: Data<UserAttributes>,
 }
 pub type PrivateMessage = TypedResource<PrivateMessageAttributes, PrivateMessageRelationships>;
 
 /// Data fimfiction returns about any single story.
 /// See https://www.fimfiction.net/developers/api/v2/docs/resources#story
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct StoryAttributes {
     /// The title of the story
-    title: String,
+    pub title: String,
     /// The short description of the story 
-    short_description: String,
+    pub short_description: String,
     /// The description of the story 
-    description: String,
+    pub description: String,
     /// HTML version of description
-    description_html: String,
+    pub description_html: String,
     /// Whether the story is published or not. Effectively the same as checking if status = visible	
-    published: bool,
+    pub published: bool,
     /// The publish status of the story
-    status: PublishStatus,
+    pub status: PublishStatus,
     /// Whether the story has been submitted or not. Set to true to submit the story
-    submitted: bool,
+    pub submitted: bool,
     /// Date the story was first published
-    date_published: DateTime<Utc>,
+    pub date_published: DateTime<Utc>,
     /// Date the story was last modified. Updated whenever any edit is made to the story
-    date_modified: DateTime<Utc>,
+    pub date_modified: DateTime<Utc>,
     /// Date the story was last updated. Only updated when a chapter is added and only if the last bump timing was more than 12 hours ago.
-    date_updated: DateTime<Utc>,
+    pub date_updated: DateTime<Utc>,
     /// Number of views the story has (max on one chapter) 
-    num_views: u32,
+    pub num_views: u32,
     /// Total number of views the story has (across all chapters)
-    total_num_views: u32,
+    pub total_num_views: u32,
     /// Number of words the story has
-    num_words: u32,
+    pub num_words: u32,
     /// Number of comments the story has
-    num_comments: u32,
+    pub num_comments: u32,
     /// Primary color for the story (based off cover art) 
-    color: Color,
+    pub color: Color,
     /// The cover image for the story
-    cover_image: CoverImage,
+    pub cover_image: CoverImage,
 
     // undocumented attributes below
-    num_chapters: u32,
-    rating: u32,
-    completion_status: CompletionStatus,
-    content_rating: ContentRating,
-    num_likes: u32,
-    num_dislikes: u32,
+    pub num_chapters: u32,
+    pub rating: u32,
+    pub completion_status: CompletionStatus,
+    pub content_rating: ContentRating,
+    pub num_likes: u32,
+    pub num_dislikes: u32,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct StoryRelationships {
-    author: Data<ResourceId>,
+    pub author: Data<ResourceId>,
     // TODO: this field isn't showing up on /stories/:id requests
-    //chapters: Data<Vec<ResourceId>>,
-    tags: Data<Vec<ResourceId>>,
+    //pub chapters: Data<Vec<ResourceId>>,
+    pub tags: Data<Vec<ResourceId>>,
     // TODO: this field isn't showing up on /stories/:id requests
-    //prequel: Data<ResourceId>,
+    //pub prequel: Data<ResourceId>,
 }
 pub type Story = TypedResource<StoryAttributes, StoryRelationships>;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct StoryTagAttributes {
-    name: String,
-    description: Option<String>,
+    pub name: String,
+    pub description: Option<String>,
     #[serde(rename="type")]
-    type_: TagType,
-    num_stories: u32,
+    pub type_: TagType,
+    pub num_stories: u32,
 }
 pub type StoryTag = TypedResource<StoryTagAttributes, ()>;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UserAttributes {
-    name: String,
+    pub name: String,
     // fimfiction docs advertise an 'email' field, but it doesn't exist.
     //email: String,
     // TODO
-    //bio: object
-    bio_html: String,
-    num_followers: u32,
-    num_stories: u32,
-    num_blog_posts: u32,
-    date_joined: DateTime<Utc>,
-    avatar: Avatar,
+    //pub bio: object
+    pub bio_html: String,
+    pub num_followers: u32,
+    pub num_stories: u32,
+    pub num_blog_posts: u32,
+    pub date_joined: DateTime<Utc>,
+    pub avatar: Avatar,
 
     // undocumented
-    color: Color,
+    pub color: Color,
     // Doesn't seem to be present when accessed from a story's 'included' resources
-    date_last_online: Option<DateTime<Utc>>,
+    pub date_last_online: Option<DateTime<Utc>>,
 }
 pub type User = TypedResource<UserAttributes, ()>;
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(tag="type", rename_all="snake_case")]
 pub enum Resource {
     BlogPost(BlogPost),
