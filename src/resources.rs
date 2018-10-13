@@ -48,9 +48,10 @@ pub struct TypedResource<Attr: Debug, Rel: Debug> {
 pub struct Avatar {
     // TODO: how many of these sizes are optional?
     // 192 was not found for https://www.fimfiction.net/api/v2/groups/209275
+    // 16 was not found for id 33084
     // TODO: Maybe some sparse vector type is better.
     #[serde(with = "url_serde", rename="16")]
-    pub size16: Url,
+    pub size16: Option<Url>,
     #[serde(with = "url_serde", rename="32")]
     pub size32: Url,
     #[serde(with = "url_serde", rename="48")]
