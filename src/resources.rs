@@ -50,7 +50,7 @@ pub struct Avatar {
     // 192 was not found for https://www.fimfiction.net/api/v2/groups/209275
     // 16 was not found for id 33084
     // TODO: Maybe some sparse vector type is better.
-    #[serde(with = "url_serde", rename="16")]
+    #[serde(default, with = "url_serde", rename="16")]
     pub size16: Option<Url>,
     #[serde(with = "url_serde", rename="32")]
     pub size32: Url,
@@ -62,8 +62,7 @@ pub struct Avatar {
     pub size96: Url,
     #[serde(with = "url_serde", rename="128")]
     pub size128: Url,
-    #[serde(with = "url_serde", rename="192")]
-    #[serde(default)]
+    #[serde(default, with = "url_serde", rename="192")]
     pub size192: Option<Url>,
     #[serde(with = "url_serde", rename="256")]
     pub size256: Url,
